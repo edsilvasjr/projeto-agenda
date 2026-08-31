@@ -1,3 +1,28 @@
-<h1>{{ nome }}</h1>
-<p>Curso: {{ curso }}</p>
-<p>Email: {{ email }}</p>
+<h1>Lista de Pessoas</h1>
+
+<div class="lista-pessoas">
+
+  @for (pessoa of pessoas; track pessoa.id) {
+    
+    <div class="cartao">
+      <h2>{{ pessoa.nome }}</h2>
+      <p><strong>Curso:</strong> {{ pessoa.curso }}</p>
+      <p><strong>Email:</strong> {{ pessoa.email }}</p>
+      <p><strong>Ativo:</strong> {{ pessoa.ativo ? 'Sim' : 'Não' }}</p>
+
+      @if (pessoa.telefone) {
+        <p><strong>Telefone:</strong> {{ pessoa.telefone }}</p>
+      } @else {
+        <p><strong>Telefone:</strong> Não informado</p>
+      }
+
+      <p><strong>Vínculo:</strong> {{ pessoa.vinculo }}</p>
+    </div>
+
+  } @empty {
+
+    <p>Nenhuma pessoa encontrada.</p>
+
+  }
+
+</div>

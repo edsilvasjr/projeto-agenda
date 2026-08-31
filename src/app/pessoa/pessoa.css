@@ -1,0 +1,22 @@
+.lista-pessoas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.cartao {
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 20px;
+  background-color: #f5f5f5;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.cartao h2 {
+  margin-top: 0;
+}
+
+.cartao p {
+  margin: 8px 0;
+}
