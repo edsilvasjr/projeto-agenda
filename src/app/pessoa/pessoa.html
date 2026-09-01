@@ -1,22 +1,72 @@
 <h1>Lista de Pessoas</h1>
 
+@if (avisosIds.length > 0) {
+  <div class="avisos-ids">
+    @for (aviso of avisosIds; track aviso) {
+      <p>{{ aviso }}</p>
+    }
+  </div>
+}
+
 <div class="lista-pessoas">
 
-  @for (pessoa of pessoas; track pessoa.id) {
-    
-    <div class="cartao">
-      <h2>{{ pessoa.nome }}</h2>
-      <p><strong>Curso:</strong> {{ pessoa.curso }}</p>
-      <p><strong>Email:</strong> {{ pessoa.email }}</p>
-      <p><strong>Ativo:</strong> {{ pessoa.ativo ? 'Sim' : 'Não' }}</p>
+  @for (resultado of resultados; track resultado.pessoa.id) {
 
-      @if (pessoa.telefone) {
-        <p><strong>Telefone:</strong> {{ pessoa.telefone }}</p>
+    <div
+      class="cartao"
+      [class.invalido]="resultado.erros.length > 0"
+    >
+
+      <h2>{{ resultado.pessoa.nome }}</h2>
+
+      <p>
+        <strong>Curso:</strong>
+        {{ resultado.pessoa.curso }}
+      </p>
+
+      <p>
+        <strong>Email:</strong>
+        {{ resultado.pessoa.email }}
+      </p>
+
+      <p>
+        <strong>Ativo:</strong>
+        {{ resultado.pessoa.ativo ? 'Sim' : 'Não' }}
+      </p>
+
+      @if (resultado.pessoa.telefone) {
+
+        <p>
+          <strong>Telefone:</strong>
+          {{ resultado.pessoa.telefone }}
+        </p>
+
       } @else {
-        <p><strong>Telefone:</strong> Não informado</p>
+
+        <p>
+          <strong>Telefone:</strong>
+          Não informado
+        </p>
+
       }
 
-      <p><strong>Vínculo:</strong> {{ pessoa.vinculo }}</p>
+      <p>
+        <strong>Vínculo:</strong>
+        {{ resultado.pessoa.vinculo }}
+      </p>
+
+      @if (resultado.erros.length > 0) {
+
+        <div class="erros">
+
+          @for (erro of resultado.erros; track erro) {
+            <p>{{ erro }}</p>
+          }
+
+        </div>
+
+      }
+
     </div>
 
   } @empty {

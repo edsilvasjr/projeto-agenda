@@ -20,3 +20,17 @@
 .cartao p {
   margin: 8px 0;
 }
+
+.cartao.invalido {
+  border: 2px solid red;
+}
+
+.erros {
+  color: red;
+  font-weight: bold;
+}
+
+.avisos-ids {
+  color: red;
+  font-weight: bold;
+}
