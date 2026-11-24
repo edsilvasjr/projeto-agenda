@@ -1,48 +1,41 @@
+import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
+import { forkJoin, Observable, of, switchMap } from 'rxjs';
 import { Evento } from './evento.model';
 import { ParticipanteService } from '../participante/participante.service';
 
 @Injectable({ providedIn: 'root' })
 export class EventoService {
+  private http = inject(HttpClient);
   private participanteService = inject(ParticipanteService);
-  private readonly chave = 'agenda_eventos';
+  private readonly url = 'http://localhost:3000/eventos';
 
-  private ler(): Evento[] {
-    try {
-      return JSON.parse(localStorage.getItem(this.chave) ?? '[]');
-    } catch {
-      return [];
-    }
+  // _embed traz os participantes de cada evento junto (relacionamento 1:N)
+  listar(): Observable<Evento[]> {
+    return this.http.get<Evento[]>(`${this.url}?_embed=participantes`);
   }
 
-  private gravar(lista: Evento[]): void {
-    localStorage.setItem(this.chave, JSON.stringify(lista));
+  buscarPorId(id: number): Observable<Evento> {
+    return this.http.get<Evento>(`${this.url}/${id}`);
   }
 
-  listar(): Evento[] {
-    return this.ler();
+  criar(dados: Omit<Evento, 'id' | 'participantes'>): Observable<Evento> {
+    return this.http.post<Evento>(this.url, dados);
   }
 
-  buscarPorId(id: number): Evento | undefined {
-    return this.ler().find(e => e.id === id);
-  }
-
-  criar(dados: Omit<Evento, 'id'>): Evento {
-    const lista = this.ler();
-    const id = lista.reduce((maior, e) => Math.max(maior, e.id), 0) + 1;
-    const novo: Evento = { ...dados, id };
-
-    this.gravar([...lista, novo]);
-    return novo;
-  }
-
-  atualizar(id: number, dados: Omit<Evento, 'id'>): void {
-    this.gravar(this.ler().map(e => (e.id === id ? { ...dados, id } : e)));
+  atualizar(id: number, dados: Omit<Evento, 'id' | 'participantes'>): Observable<Evento> {
+    return this.http.put<Evento>(`${this.url}/${id}`, { ...dados, id });
   }
 
   // Regra de negócio: ao excluir o evento, seus participantes também são excluídos
-  excluir(id: number): void {
-    this.participanteService.excluirPorEvento(id);
-    this.gravar(this.ler().filter(e => e.id !== id));
+  excluir(id: number): Observable<unknown> {
+    return this.participanteService.listarPorEvento(id).pipe(
+      switchMap(participantes =>
+        participantes.length > 0
+          ? forkJoin(participantes.map(p => this.participanteService.excluir(p.id)))
+          : of([])
+      ),
+      switchMap(() => this.http.delete(`${this.url}/${id}`))
+    );
   }
 }

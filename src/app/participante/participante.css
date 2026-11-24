@@ -31,11 +31,30 @@
 }
 
 .cartao h2 {
-  margin-top: 0;
+  margin: 0;
 }
 
 .cartao p {
   margin: 8px 0;
+}
+
+.topo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #3f51b5;
+  color: #fff;
+  font-weight: bold;
 }
 
 .botoes {

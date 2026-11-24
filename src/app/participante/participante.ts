@@ -1,4 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import {
@@ -6,19 +7,34 @@ import {
   FormaPagamento,
   Participante as ParticipanteModel
 } from './participante.model';
+import { Evento as EventoModel } from '../evento/evento.model';
 import { validarParticipante } from './participante.validacao';
 import { ParticipanteService } from './participante.service';
 import { EventoService } from '../evento/evento.service';
+import { TelefonePipe } from '../pipes/telefone-pipe';
+import { FormaPagamentoPipe } from '../pipes/forma-pagamento-pipe';
+import { IniciaisPipe } from '../pipes/iniciais-pipe';
+import { DiasParaPipe } from '../pipes/dias-para-pipe';
+
+const MSG_API = 'Não foi possível comunicar com a API. O json-server está rodando? (npm run api)';
 
 interface FormParticipante {
   descricao: string;
   email: string;
   telefone: string;
-  formaPagamento: FormaPagamento | '';
+  formaPagamento: FormaPagamento;
 }
 
 @Component({
-  imports: [FormsModule, RouterLink],
+  imports: [
+    FormsModule,
+    RouterLink,
+    DatePipe,
+    TelefonePipe,
+    FormaPagamentoPipe,
+    IniciaisPipe,
+    DiasParaPipe
+  ],
   selector: 'app-participante',
   styleUrl: './participante.css',
   templateUrl: './participante.html',
@@ -30,7 +46,10 @@ export class Participante {
 
   // O contexto vem da rota: /evento/:eventoId/participantes
   eventoId = Number(this.route.snapshot.paramMap.get('eventoId'));
-  evento = this.eventoService.buscarPorId(this.eventoId);
+
+  evento = signal<EventoModel | null>(null);
+  carregandoEvento = signal(true);
+  erroApi = signal('');
 
   formas = FORMAS_PAGAMENTO;
   participantes = signal<ParticipanteModel[]>([]);
@@ -40,7 +59,17 @@ export class Participante {
   form: FormParticipante = this.formVazio();
 
   constructor() {
-    this.carregar();
+    this.eventoService.buscarPorId(this.eventoId).subscribe({
+      next: evento => {
+        this.evento.set(evento);
+        this.carregandoEvento.set(false);
+        this.carregar();
+      },
+      error: () => {
+        this.evento.set(null);
+        this.carregandoEvento.set(false);
+      }
+    });
   }
 
   private formVazio(): FormParticipante {
@@ -48,7 +77,13 @@ export class Participante {
   }
 
   carregar(): void {
-    this.participantes.set(this.participanteService.listarPorEvento(this.eventoId));
+    this.participanteService.listarPorEvento(this.eventoId).subscribe({
+      next: lista => {
+        this.participantes.set(lista);
+        this.erroApi.set('');
+      },
+      error: () => this.erroApi.set(MSG_API)
+    });
   }
 
   salvar(): void {
@@ -63,19 +98,21 @@ export class Participante {
       descricao: this.form.descricao.trim(),
       email: this.form.email.trim(),
       telefone: this.form.telefone.trim(),
-      formaPagamento: this.form.formaPagamento as FormaPagamento
+      formaPagamento: this.form.formaPagamento
     };
 
     const id = this.editandoId();
+    const requisicao = id !== null
+      ? this.participanteService.atualizar(id, dados)
+      : this.participanteService.criar(this.eventoId, dados);
 
-    if (id !== null) {
-      this.participanteService.atualizar(id, dados);
-    } else {
-      this.participanteService.criar(this.eventoId, dados);
-    }
-
-    this.cancelar();
-    this.carregar();
+    requisicao.subscribe({
+      next: () => {
+        this.cancelar();
+        this.carregar();
+      },
+      error: () => this.erroApi.set(MSG_API)
+    });
   }
 
   editar(participante: ParticipanteModel): void {
@@ -91,8 +128,10 @@ export class Participante {
 
   excluir(participante: ParticipanteModel): void {
     if (confirm(`Excluir o participante "${participante.descricao}"?`)) {
-      this.participanteService.excluir(participante.id);
-      this.carregar();
+      this.participanteService.excluir(participante.id).subscribe({
+        next: () => this.carregar(),
+        error: () => this.erroApi.set(MSG_API)
+      });
     }
   }
 

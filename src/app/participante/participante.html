@@ -1,13 +1,28 @@
 <a routerLink="/evento">← Voltar para eventos</a>
 
-@if (!evento) {
+@if (carregandoEvento()) {
+
+  <p>Carregando...</p>
+
+} @else if (evento() === null) {
 
   <h1>Evento não encontrado</h1>
-  <p>O evento informado não existe ou foi excluído.</p>
+  <p>O evento não existe ou a API está fora do ar. Confira se o json-server está rodando (npm run api).</p>
 
 } @else {
 
-  <h1>Participantes de "{{ evento.nome }}"</h1>
+  <h1>Participantes de "{{ evento()?.nome }}"</h1>
+  <p>
+    {{ evento()?.data | date: "EEEE, d 'de' MMMM" }}
+    ·
+    {{ evento()?.data | date: 'dd/MM/yyyy' }}
+    ·
+    {{ evento()?.data | diasPara }}
+  </p>
+
+  @if (erroApi()) {
+    <p class="erros">{{ erroApi() }}</p>
+  }
 
   <form class="formulario" (ngSubmit)="salvar()">
     <h2>{{ editandoId() !== null ? 'Editar participante' : 'Adicionar participante' }}</h2>
@@ -28,7 +43,7 @@
       <select name="formaPagamento" [(ngModel)]="form.formaPagamento">
         <option value="">Selecione...</option>
         @for (forma of formas; track forma) {
-          <option [value]="forma">{{ forma }}</option>
+          <option [value]="forma">{{ forma | formaPagamento }}</option>
         }
       </select>
     </label>
@@ -55,7 +70,10 @@
 
       <div class="cartao">
 
-        <h2>{{ participante.descricao }}</h2>
+        <div class="topo">
+          <span class="avatar">{{ participante.descricao | iniciais }}</span>
+          <h2>{{ participante.descricao }}</h2>
+        </div>
 
         <p>
           <strong>E-mail:</strong>
@@ -64,12 +82,12 @@
 
         <p>
           <strong>Telefone:</strong>
-          {{ participante.telefone }}
+          {{ participante.telefone | telefone }}
         </p>
 
         <p>
           <strong>Pagamento:</strong>
-          {{ participante.formaPagamento }}
+          {{ participante.formaPagamento | formaPagamento }}
         </p>
 
         <div class="botoes">
@@ -81,7 +99,7 @@
 
     } @empty {
 
-      <p>Nenhum participante cadastrado neste evento.</p>
+      <p>Nenhum participante neste evento.</p>
 
     }
 

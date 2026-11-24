@@ -1,12 +1,7 @@
-export const FORMAS_PAGAMENTO = [
-    'Pix',
-    'Cartão de crédito',
-    'Cartão de débito',
-    'Dinheiro',
-    'Boleto'
-] as const;
+export const FORMAS_PAGAMENTO = ['pix', 'cartao', 'boleto', 'dinheiro'] as const;
 
-export type FormaPagamento = typeof FORMAS_PAGAMENTO[number];
+// Guarda o código (pix, cartao...). O texto bonito é responsabilidade do pipe formaPagamento
+export type FormaPagamento = typeof FORMAS_PAGAMENTO[number] | '';
 
 export interface Participante {
     id: number;

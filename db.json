@@ -1,4 +1,22 @@
 {
-  "eventos": [],
-  "participantes": []
+  "eventos": [
+    {
+      "nome": "show snsd",
+      "data": "2026-11-30",
+      "local": "unijorge",
+      "vagas": 1200,
+      "descricao": "show do snsd na unijorge",
+      "id": 1
+    }
+  ],
+  "participantes": [
+    {
+      "descricao": "participante 1",
+      "email": "snsd@gmail.com",
+      "telefone": "71988887777",
+      "formaPagamento": "pix",
+      "eventoId": 1,
+      "id": 1
+    }
+  ]
 }
