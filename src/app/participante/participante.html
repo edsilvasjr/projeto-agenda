@@ -1,0 +1,90 @@
+<a routerLink="/evento">← Voltar para eventos</a>
+
+@if (!evento) {
+
+  <h1>Evento não encontrado</h1>
+  <p>O evento informado não existe ou foi excluído.</p>
+
+} @else {
+
+  <h1>Participantes de "{{ evento.nome }}"</h1>
+
+  <form class="formulario" (ngSubmit)="salvar()">
+    <h2>{{ editandoId() !== null ? 'Editar participante' : 'Adicionar participante' }}</h2>
+
+    <label>Descrição
+      <input name="descricao" [(ngModel)]="form.descricao" />
+    </label>
+
+    <label>E-mail
+      <input name="email" [(ngModel)]="form.email" />
+    </label>
+
+    <label>Telefone
+      <input name="telefone" [(ngModel)]="form.telefone" />
+    </label>
+
+    <label>Forma de pagamento
+      <select name="formaPagamento" [(ngModel)]="form.formaPagamento">
+        <option value="">Selecione...</option>
+        @for (forma of formas; track forma) {
+          <option [value]="forma">{{ forma }}</option>
+        }
+      </select>
+    </label>
+
+    @if (erros().length > 0) {
+      <div class="erros">
+        @for (erro of erros(); track erro) {
+          <p>{{ erro }}</p>
+        }
+      </div>
+    }
+
+    <div class="botoes">
+      <button type="submit">{{ editandoId() !== null ? 'Salvar alterações' : 'Adicionar participante' }}</button>
+      @if (editandoId() !== null) {
+        <button type="button" (click)="cancelar()">Cancelar</button>
+      }
+    </div>
+  </form>
+
+  <div class="lista-participantes">
+
+    @for (participante of participantes(); track participante.id) {
+
+      <div class="cartao">
+
+        <h2>{{ participante.descricao }}</h2>
+
+        <p>
+          <strong>E-mail:</strong>
+          {{ participante.email }}
+        </p>
+
+        <p>
+          <strong>Telefone:</strong>
+          {{ participante.telefone }}
+        </p>
+
+        <p>
+          <strong>Pagamento:</strong>
+          {{ participante.formaPagamento }}
+        </p>
+
+        <div class="botoes">
+          <button type="button" (click)="editar(participante)">Editar</button>
+          <button type="button" (click)="excluir(participante)">Excluir</button>
+        </div>
+
+      </div>
+
+    } @empty {
+
+      <p>Nenhum participante cadastrado neste evento.</p>
+
+    }
+
+  </div>
+
+}

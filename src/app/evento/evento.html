@@ -1,0 +1,82 @@
+<h1>Eventos</h1>
+
+<form class="formulario" (ngSubmit)="salvar()">
+  <h2>{{ editandoId() !== null ? 'Editar evento' : 'Cadastrar evento' }}</h2>
+
+  <label>Nome
+    <input name="nome" [(ngModel)]="form.nome" />
+  </label>
+
+  <label>Data
+    <input name="data" type="date" [(ngModel)]="form.data" />
+  </label>
+
+  <label>Local
+    <input name="local" [(ngModel)]="form.local" />
+  </label>
+
+  <label>Descrição (opcional)
+    <input name="descricao" [(ngModel)]="form.descricao" />
+  </label>
+
+  @if (erros().length > 0) {
+    <div class="erros">
+      @for (erro of erros(); track erro) {
+        <p>{{ erro }}</p>
+      }
+    </div>
+  }
+
+  <div class="botoes">
+    <button type="submit">{{ editandoId() !== null ? 'Salvar alterações' : 'Cadastrar evento' }}</button>
+    @if (editandoId() !== null) {
+      <button type="button" (click)="cancelar()">Cancelar</button>
+    }
+  </div>
+</form>
+
+<div class="lista-eventos">
+
+  @for (evento of eventos(); track evento.id) {
+
+    <div class="cartao">
+
+      <h2>{{ evento.nome }}</h2>
+
+      <p>
+        <strong>Data:</strong>
+        {{ evento.data | date: 'dd/MM/yyyy' }}
+      </p>
+
+      <p>
+        <strong>Local:</strong>
+        {{ evento.local }}
+      </p>
+
+      @if (evento.descricao) {
+        <p>
+          <strong>Descrição:</strong>
+          {{ evento.descricao }}
+        </p>
+      }
+
+      <p>
+        <strong>Participantes:</strong>
+        {{ totalParticipantes(evento.id) }}
+      </p>
+
+      <div class="botoes">
+        <a class="botao" [routerLink]="['/evento', evento.id, 'participantes']">Participantes</a>
+        <button type="button" (click)="editar(evento)">Editar</button>
+        <button type="button" (click)="excluir(evento)">Excluir</button>
+      </div>
+
+    </div>
+
+  } @empty {
+
+    <p>Nenhum evento cadastrado.</p>
+
+  }
+
+</div>
